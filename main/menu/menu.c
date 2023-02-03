@@ -79,11 +79,11 @@ static const char* Return_Text_Button(uint32_t button)
 			return "D-RIGHT";
 		break;
 		/* A button */
-		case SDLK_LCTRL:
+		case SDLK_LALT:
 			return "A";
 		break;
 		/* B button */
-		case SDLK_LALT:
+		case SDLK_LCTRL:
 			return "B";
 		break;
 		/* X button */
@@ -340,7 +340,7 @@ static uint32_t sdl_controls_update_input(SDLKey k, int32_t p)
 					if (menu_oswan.scaling > 2) menu_oswan.scaling = 0;
 				}
 			break;
-			case SDLK_LCTRL:
+			case SDLK_LALT:
 			case SDLK_RETURN:
 				if (menu_oswan.Choose_Menu_value == 4) Set_Menu(CONTROLS_MENU);
 				else if (menu_oswan.Choose_Menu_value == 5)
@@ -383,11 +383,11 @@ static uint32_t sdl_controls_update_input(SDLKey k, int32_t p)
 			case SDLK_RIGHT:
 				profile_config = 1;
 			break;
-			case SDLK_LCTRL:
+			case SDLK_LALT:
 			case SDLK_RETURN:
 				Set_Menu(SETTINGS_KEY_SCREEN);
 			break;
-			case SDLK_LALT:
+			case SDLK_LCTRL:
 				Set_Menu(EMULATOR_MAIN_MENU);
 			break;
 		}

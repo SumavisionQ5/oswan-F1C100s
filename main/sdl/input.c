@@ -24,9 +24,7 @@ void exit_button(void)
 	keys = SDL_GetKeyState(NULL);
 	/* Get to Menu hotkey */
 	if ( ((keys[SDLK_ESCAPE] == SDL_PRESSED) && (keys[SDLK_RETURN] == SDL_PRESSED)) 
-	#ifdef RG99
-	|| keys[SDLK_PAGEUP] == SDL_PRESSED
-	#endif
+	|| keys[SDLK_RCTRL] == SDL_PRESSED
 	) 
 	{ 
 		m_Flag = GF_MAINUI;

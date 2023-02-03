@@ -1,34 +1,38 @@
-CC 			= clang
+PRGNAME     = oswan
+CC			= /opt/miyoo/bin/arm-linux-gcc
 
-CFLAGS  	= -O2 -g -Weverything -fno-common -fdata-sections -ffunction-sections -Imain/emu -Imain/sdl -Imain/headers -Imain/menu -Imain/sound -Imain/scalers
-CFLAGS 	   += ${DEFINES}
-CFLAGS 	   += $(shell sdl-config --cflags) -std=gnu99
-DEFINES 	= -DHOME_SUPPORT -DSOUND_ON -DSOUND_EMULATION -DPOSIX -DRS90
-LDFLAGS 	= $(shell sdl-config --libs) -Wl,--as-needed -Wl,--gc-sections
-OUT  		= oswan
+PROFILE = 0
 
-SDL 		= main/sdl/main.c main/sdl/input.c main/sound/sound_SDL.c
-CPU 		= main/emu/cpu/nec.c
-CORE 		= main/emu/WS.c main/emu/WSFileio.c main/emu/WSRender.c main/emu/WSApu.c 
-DRAWING		= main/sdl/drawing.c main/scalers/scaler.c
-MENU 		= main/menu/menu.c main/menu/font_drawing.c
+SRCDIR		= ./main/sdl ./main/sound ./main/emu/cpu ./main/emu ./main/menu ./main/scalers
+SRCDIR		+= ./source/scalers ./source/ports/$(PORT) ./source/sound/$(SOUND_ENGINE) ./source/sound_output/$(SOUND_OUTPUT)
+VPATH		= $(SRCDIR)
+SRC_C		= $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.c))
+SRC_CP		= $(foreach dir, $(SRCDIR), $(wildcard $(dir)/*.cpp))
+OBJ_C		= $(notdir $(patsubst %.c, %.o, $(SRC_C)))
+OBJ_CP		= $(notdir $(patsubst %.cpp, %.o, $(SRC_CP)))
+OBJS		= $(OBJ_C) $(OBJ_CP)
 
-SOURCES 	= ${SDL} ${CPU} ${CORE} ${DRAWING} ${MENU}
+CFLAGS	   += -DSOUND_ON -DSOUND_EMULATION -DFRAMESKIP -DBITTBOY
+CFLAGS	   += -Ofast -fdata-sections -ffunction-sections  -flto -fno-PIC
+CFLAGS	   += -fsingle-precision-constant
 
-# Comment the 3 lines below to disable zip support
-#CFLAGS 	   += -DZIP_SUPPORT -I./minizip
-#LDFLAGS	   += 
-#THIRD_PARTY+= minizip/unzip.o minizip/ioapi.o minizip/fileio.o minizip/miniz.o
+ifeq ($(PROFILE), YES)
+CFLAGS 		+= -fprofile-generate="./"
+LDFLAGS		+= -lgcov
+else ifeq ($(PROFILE), APPLY)
+CFLAGS		+= -fprofile-use="./"
+endif
+CFLAGS		+= -std=gnu99
+CFLAGS		+= -Imain/emu -Imain/sdl -Imain/headers -Imain/menu -Imain/sound -Imain/scalers
 
-CFLAGS 	   += -DJOYSTICK
+LDFLAGS       = -nodefaultlibs -lc -lgcc -lSDL -lasound -lz -lm -Wl,-O1,--sort-common,--as-needed,--gc-sections -s -flto -no-pie -flto -s
 
-SOURCES    += ${THIRD_PARTY}
+# Rules to make executable
+$(PRGNAME): $(OBJS)  
+	$(CC) $(CFLAGS) -o $(PRGNAME) $^ $(LDFLAGS)
 
-OBJS 		= ${SOURCES:.c=.o}
+$(OBJ_C) : %.o : %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-${OUT}	: ${OBJS}
-		${CC} -o ${OUT} ${SOURCES} ${CFLAGS} ${LDFLAGS}
-		
-clean	:
-		rm ${OBJS}
-		rm ${OUT}
+clean:
+	rm -f $(PRGNAME) *.o
